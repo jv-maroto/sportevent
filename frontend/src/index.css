@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    background-color: #0a0a0b;
+    color: #f0f0ec;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Syne', sans-serif;
+  }
+
+  ::selection {
+    background: rgba(200, 255, 0, 0.3);
+    color: #f0f0ec;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a32;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c8ff00;
+  }
+}
+
+@layer components {
+  /* Noise grain overlay */
+  .grain-overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    animation: grain 0.5s steps(10) infinite;
+    opacity: 0.4;
+  }
+
+  /* Glow accent on elements */
+  .glow-lime {
+    box-shadow: 0 0 30px rgba(200, 255, 0, 0.15), 0 0 60px rgba(200, 255, 0, 0.05);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 40px rgba(200, 255, 0, 0.3);
+  }
+
+  /* Diagonal clip */
+  .clip-diagonal {
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+  }
+
+  .clip-diagonal-reverse {
+    clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 100%);
+  }
+
+  /* Stagger animation delays */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+
+  /* Input styles for dark theme */
+  .input-dark {
+    @apply w-full px-4 py-3 bg-dark-700 border border-dark-500 rounded-lg text-smoke-100 placeholder-smoke-400
+           focus:ring-2 focus:ring-lime-400/50 focus:border-lime-400 outline-none transition-all duration-300;
+  }
+
+  .input-dark:focus {
+    box-shadow: 0 0 20px rgba(200, 255, 0, 0.1);
+  }
+
+  /* Button primary */
+  .btn-primary {
+    @apply bg-lime-400 text-dark-900 font-display font-bold px-6 py-3 rounded-lg
+           hover:bg-lime-500 transition-all duration-300 cursor-pointer uppercase tracking-wider text-sm;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 30px rgba(200, 255, 0, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  /* Button secondary / outline */
+  .btn-outline {
+    @apply border border-dark-400 text-smoke-200 font-display font-semibold px-6 py-3 rounded-lg
+           hover:border-lime-400 hover:text-lime-400 transition-all duration-300 cursor-pointer uppercase tracking-wider text-sm;
+  }
+
+  /* Card dark */
+  .card-dark {
+    @apply bg-dark-700 border border-dark-500 rounded-xl overflow-hidden transition-all duration-500;
+  }
+
+  .card-dark:hover {
+    border-color: rgba(200, 255, 0, 0.3);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(200, 255, 0, 0.05);
+    transform: translateY(-4px);
+  }
+
+  /* Grid pattern background */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(200, 255, 0, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200, 255, 0, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Mesh gradient */
+  .bg-mesh {
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(200, 255, 0, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(200, 255, 0, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(100, 130, 0, 0.05) 0%, transparent 50%);
+  }
+
+  /* Status badges */
+  .badge-confirmed {
+    @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20;
+  }
+  .badge-pending {
+    @apply bg-amber-500/10 text-amber-400 border border-amber-500/20;
+  }
+  .badge-cancelled {
+    @apply bg-red-500/10 text-red-400 border border-red-500/20;
+  }
+}

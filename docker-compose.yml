@@ -1,0 +1,45 @@
+services:
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sportevent
+      POSTGRES_PASSWORD: sportevent_secret
+      POSTGRES_DB: sportevent_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Backend FastAPI
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/app/uploads
+    depends_on:
+      - db
+
+  # Frontend React
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  backend_uploads:

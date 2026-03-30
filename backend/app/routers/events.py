@@ -35,6 +35,16 @@ def _event_to_response(event: Event) -> EventResponse:
     )
 
 
+@router.get("/my", response_model=List[EventResponse])
+def list_my_events(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_organizer),
+):
+    """Listar todos los eventos del organizador (incluidos borradores)."""
+    events = db.query(Event).filter(Event.organizer_id == current_user.id).order_by(Event.date.asc()).all()
+    return [_event_to_response(e) for e in events]
+
+
 @router.get("/", response_model=List[EventResponse])
 def list_events(
     sport: Optional[str] = Query(None),

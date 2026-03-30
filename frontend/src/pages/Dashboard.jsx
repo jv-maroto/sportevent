@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
 import { getEventInscriptions } from '../services/inscriptions';
 import { createResult } from '../services/results';
-import { updateEvent } from '../services/events';
+import { getMyEvents, updateEvent } from '../services/events';
 import toast from 'react-hot-toast';
 import {
   LayoutDashboard, CalendarPlus, Users, Euro, Eye, Trophy,
@@ -25,10 +24,10 @@ export default function Dashboard() {
 
   const loadMyEvents = async () => {
     try {
-      const res = await api.get('/api/events/');
-      setEvents(res.data || []);
+      const data = await getMyEvents();
+      setEvents(data || []);
     } catch (err) {
-      console.error(err);
+      toast.error('Error cargando tus eventos');
     } finally {
       setLoading(false);
     }

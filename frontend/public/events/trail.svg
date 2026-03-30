@@ -1,0 +1,17 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#111113"/>
+  <pattern id="grid-t" patternUnits="userSpaceOnUse" width="40" height="40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#c8ff0008" stroke-width="0.5"/></pattern>
+  <rect width="800" height="400" fill="url(#grid-t)"/>
+  <!-- Mountains -->
+  <path d="M0 400 L150 120 L300 280 L450 80 L600 220 L750 100 L800 180 L800 400 Z" fill="#c8ff00" opacity="0.07"/>
+  <path d="M0 400 L100 200 L250 320 L400 150 L550 280 L700 160 L800 250 L800 400 Z" fill="#c8ff00" opacity="0.05"/>
+  <!-- Peak accent -->
+  <circle cx="450" cy="80" r="5" fill="#c8ff00" opacity="0.6"/>
+  <line x1="450" y1="85" x2="450" y2="400" stroke="#c8ff00" stroke-width="0.5" opacity="0.1" stroke-dasharray="4 6"/>
+  <!-- Trail runner small -->
+  <circle cx="380" cy="170" r="8" fill="#c8ff00"/>
+  <line x1="380" y1="178" x2="380" y2="200" stroke="#c8ff00" stroke-width="2.5"/>
+  <line x1="380" y1="200" x2="370" y2="220" stroke="#c8ff00" stroke-width="2"/>
+  <line x1="380" y1="200" x2="390" y2="220" stroke="#c8ff00" stroke-width="2"/>
+  <text x="400" y="370" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="32" fill="#f0f0ec" letter-spacing="8">TRAIL</text>
+</svg>

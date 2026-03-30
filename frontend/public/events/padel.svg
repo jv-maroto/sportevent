@@ -1,0 +1,20 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#111113"/>
+  <pattern id="grid-p" patternUnits="userSpaceOnUse" width="40" height="40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#c8ff0008" stroke-width="0.5"/></pattern>
+  <rect width="800" height="400" fill="url(#grid-p)"/>
+  <circle cx="600" cy="250" r="200" fill="#c8ff00" opacity="0.06"/>
+  <circle cx="150" cy="100" r="180" fill="#c8ff00" opacity="0.04"/>
+  <!-- Padel racket -->
+  <g transform="translate(320, 40) rotate(15)">
+    <rect x="30" y="0" width="100" height="140" rx="50" fill="none" stroke="#c8ff00" stroke-width="4"/>
+    <line x1="80" y1="0" x2="80" y2="140" stroke="#c8ff00" stroke-width="1.5" opacity="0.4"/>
+    <line x1="30" y1="70" x2="130" y2="70" stroke="#c8ff00" stroke-width="1.5" opacity="0.4"/>
+    <line x1="30" y1="35" x2="130" y2="35" stroke="#c8ff00" stroke-width="1" opacity="0.2"/>
+    <line x1="30" y1="105" x2="130" y2="105" stroke="#c8ff00" stroke-width="1" opacity="0.2"/>
+    <rect x="70" y="140" width="20" height="80" rx="8" fill="#c8ff00" opacity="0.7"/>
+  </g>
+  <!-- Ball -->
+  <circle cx="550" cy="180" r="25" fill="#c8ff00" opacity="0.8"/>
+  <path d="M530 160 Q550 180 530 200" fill="none" stroke="#111113" stroke-width="2"/>
+  <text x="400" y="360" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="32" fill="#f0f0ec" letter-spacing="8">PADEL</text>
+</svg>

@@ -24,6 +24,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
+    # sub debe ser string para que python-jose no lance JWTClaimsError
+    if "sub" in to_encode:
+        to_encode["sub"] = str(to_encode["sub"])
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -39,11 +42,12 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: int | None = payload.get("sub")
-        if user_id is None:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM], options={"verify_sub": False})
+        sub = payload.get("sub")
+        if sub is None:
             raise credentials_exception
-    except JWTError:
+        user_id = int(sub)
+    except (JWTError, ValueError):
         raise credentials_exception
 
     user = db.query(User).filter(User.id == user_id).first()

@@ -7,6 +7,20 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { Calendar, MapPin, Users, Tag, Trophy, ArrowLeft, Zap, Clock, Target } from 'lucide-react';
 
+const SPORT_IMAGES = {
+  running: '/events/running.svg',
+  ciclismo: '/events/ciclismo.svg',
+  natacion: '/events/natacion.svg',
+  padel: '/events/padel.svg',
+  futbol: '/events/futbol.svg',
+  trail: '/events/trail.svg',
+};
+
+function getSportImage(sport) {
+  const key = sport?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return SPORT_IMAGES[key] || null;
+}
+
 export default function EventDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -112,6 +126,8 @@ export default function EventDetail() {
         <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden mb-10 opacity-0 animate-fade-up">
           {event.image_url ? (
             <img src={`${API_URL}${event.image_url}`} alt={event.title} className="w-full h-full object-cover" />
+          ) : getSportImage(event.sport) ? (
+            <img src={getSportImage(event.sport)} alt={event.sport} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-dark-700 via-dark-800 to-dark-900 flex items-center justify-center">
               <Zap className="w-20 h-20 text-dark-600" />

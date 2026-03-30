@@ -1,0 +1,19 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#111113"/>
+  <!-- Grid -->
+  <pattern id="grid-r" patternUnits="userSpaceOnUse" width="40" height="40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#c8ff0008" stroke-width="0.5"/></pattern>
+  <rect width="800" height="400" fill="url(#grid-r)"/>
+  <!-- Gradient mesh -->
+  <circle cx="200" cy="300" r="250" fill="#c8ff00" opacity="0.06"/>
+  <circle cx="600" cy="100" r="200" fill="#c8ff00" opacity="0.04"/>
+  <!-- Runner silhouette -->
+  <g transform="translate(300, 80)" opacity="0.9">
+    <path d="M100 40c11 0 20-9 20-20s-9-20-20-20-20 9-20 20 9 20 20 20zm-28 24l-30 120 24 6 22-88 18 70h-30l-8 30h70l-8-30h-10l-24-96 40 36v82h24V162l-54-50-12-48z" fill="#c8ff00"/>
+  </g>
+  <!-- Text -->
+  <text x="400" y="350" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="32" fill="#f0f0ec" letter-spacing="8">RUNNING</text>
+  <!-- Speed lines -->
+  <line x1="50" y1="160" x2="200" y2="160" stroke="#c8ff00" stroke-width="2" opacity="0.3"/>
+  <line x1="80" y1="200" x2="250" y2="200" stroke="#c8ff00" stroke-width="1.5" opacity="0.2"/>
+  <line x1="30" y1="240" x2="180" y2="240" stroke="#c8ff00" stroke-width="1" opacity="0.15"/>
+</svg>

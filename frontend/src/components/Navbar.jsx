@@ -19,9 +19,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 bg-lime-400 rounded-lg flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(200,255,0,0.4)] transition-all duration-300">
-              <Trophy className="w-4 h-4 text-dark-900" />
-            </div>
+            <img src="/logo.svg" alt="SportEvent" className="w-8 h-8 group-hover:drop-shadow-[0_0_12px_rgba(200,255,0,0.5)] transition-all duration-300" />
             <span className="font-display font-bold text-lg text-smoke-100 tracking-tight">
               Sport<span className="text-lime-400">Event</span>
             </span>

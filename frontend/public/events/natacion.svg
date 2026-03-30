@@ -1,0 +1,20 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#111113"/>
+  <pattern id="grid-n" patternUnits="userSpaceOnUse" width="40" height="40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#c8ff0008" stroke-width="0.5"/></pattern>
+  <rect width="800" height="400" fill="url(#grid-n)"/>
+  <circle cx="400" cy="350" r="300" fill="#0ea5e9" opacity="0.06"/>
+  <circle cx="200" cy="100" r="150" fill="#c8ff00" opacity="0.04"/>
+  <!-- Waves -->
+  <path d="M0 250 Q100 220 200 250 T400 250 T600 250 T800 250 V400 H0 Z" fill="#0ea5e9" opacity="0.08"/>
+  <path d="M0 270 Q100 240 200 270 T400 270 T600 270 T800 270 V400 H0 Z" fill="#0ea5e9" opacity="0.05"/>
+  <!-- Swimmer -->
+  <g transform="translate(250, 200)">
+    <circle cx="30" cy="0" r="18" fill="#c8ff00" opacity="0.8"/>
+    <ellipse cx="130" cy="10" rx="100" ry="15" fill="#c8ff00" opacity="0.5"/>
+    <path d="M50 -15 L100 -60 L120 -40" fill="none" stroke="#c8ff00" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- Lane lines -->
+  <line x1="0" y1="290" x2="800" y2="290" stroke="#c8ff00" stroke-width="1" opacity="0.15" stroke-dasharray="10 10"/>
+  <line x1="0" y1="310" x2="800" y2="310" stroke="#c8ff00" stroke-width="1" opacity="0.1" stroke-dasharray="10 10"/>
+  <text x="400" y="370" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="32" fill="#f0f0ec" letter-spacing="8">NATACION</text>
+</svg>

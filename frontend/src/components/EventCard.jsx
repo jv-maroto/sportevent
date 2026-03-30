@@ -1,8 +1,23 @@
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Users, Zap } from 'lucide-react';
 
+const SPORT_IMAGES = {
+  running: '/events/running.svg',
+  ciclismo: '/events/ciclismo.svg',
+  natacion: '/events/natacion.svg',
+  padel: '/events/padel.svg',
+  futbol: '/events/futbol.svg',
+  trail: '/events/trail.svg',
+};
+
+function getSportImage(sport) {
+  const key = sport?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return SPORT_IMAGES[key] || null;
+}
+
 export default function EventCard({ event, index = 0 }) {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const fallbackImage = getSportImage(event.sport);
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('es-ES', {
@@ -26,6 +41,12 @@ export default function EventCard({ event, index = 0 }) {
             alt={event.title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
+        ) : fallbackImage ? (
+          <img
+            src={fallbackImage}
+            alt={event.sport}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-dark-600 via-dark-700 to-dark-800 flex items-center justify-center">
             <Zap className="w-12 h-12 text-dark-400 group-hover:text-lime-400/30 transition-colors duration-500" />
@@ -44,7 +65,7 @@ export default function EventCard({ event, index = 0 }) {
               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20'
               : 'bg-dark-900/80 text-smoke-100 border border-dark-500/50'
           }`}>
-            {event.price === 0 ? 'GRATIS' : `${event.price.toFixed(2)} €`}
+            {event.price === 0 ? 'GRATIS' : `${event.price.toFixed(2)} \u20ac`}
           </span>
         </div>
         {/* Hover overlay */}

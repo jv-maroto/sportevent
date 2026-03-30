@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getEvents } from '../services/events';
 import EventCard from '../components/EventCard';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
 export default function EventList() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
   const [search, setSearch] = useState('');
-  const [sport, setSport] = useState('');
+  const [sport, setSport] = useState(searchParams.get('sport') || '');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Sincronizar URL con el estado
+    if (sport) {
+      setSearchParams({ sport });
+    } else {
+      setSearchParams({});
+    }
     loadEvents();
   }, [sport]);
 

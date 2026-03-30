@@ -15,17 +15,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor para manejar errores 401
+// Interceptor de respuesta: NO redirigir a login automaticamente.
+// Cada componente maneja sus propios errores via try/catch.
+// Si el token expira, ProtectedRoute se encarga al navegar.
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;

@@ -6,14 +6,20 @@ import { createCheckout } from '../services/inscriptions';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { Calendar, MapPin, Users, Tag, Trophy, ArrowLeft, Zap, Clock, Target } from 'lucide-react';
+import runningImg from '../assets/running.jfif';
+import ciclismoImg from '../assets/ciclismo.jfif';
+import natacionImg from '../assets/natacion.jfif';
+import padelImg from '../assets/padel.jfif';
+import futbolImg from '../assets/futbol.jfif';
+import trailImg from '../assets/trail.jfif';
 
 const SPORT_IMAGES = {
-  running: '/events/running.svg',
-  ciclismo: '/events/ciclismo.svg',
-  natacion: '/events/natacion.svg',
-  padel: '/events/padel.svg',
-  futbol: '/events/futbol.svg',
-  trail: '/events/trail.svg',
+  running: runningImg,
+  ciclismo: ciclismoImg,
+  natacion: natacionImg,
+  padel: padelImg,
+  futbol: futbolImg,
+  trail: trailImg,
 };
 
 function getSportImage(sport) {

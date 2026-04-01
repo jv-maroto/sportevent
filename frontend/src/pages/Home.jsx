@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, Zap, CreditCard, Medal, ArrowRight, ChevronRight, Timer, MapPin, Users } from 'lucide-react';
+import heroImg from '../assets/hero.jfif';
+import runningImg from '../assets/running.jfif';
+import ciclismoImg from '../assets/ciclismo.jfif';
+import natacionImg from '../assets/natacion.jfif';
+import padelImg from '../assets/padel.jfif';
+import trailImg from '../assets/trail.jfif';
+import futbolImg from '../assets/futbol.jfif';
+import ctaImg from '../assets/cta.jfif';
 
 // Animated counter component
 function AnimatedCounter({ target, suffix = '', duration = 2000 }) {
@@ -122,13 +130,28 @@ export default function Home() {
         className="relative min-h-screen flex items-center"
         onMouseMove={handleMouseMove}
       >
+        {/* Hero background image with ken-burns */}
+        <div className="absolute inset-0 overflow-hidden">
+          <img
+            src={heroImg}
+            alt=""
+            className="absolute w-full h-full object-cover object-right animate-ken-burns opacity-0"
+            style={{
+              animation: 'ken-burns 20s ease-in-out infinite, fadeIn 1.5s ease-out 0.3s forwards',
+              transform: `translate(${mousePos.x * -0.3}px, ${mousePos.y * -0.3}px) scale(1.05)`,
+              transition: 'transform 0.8s ease-out',
+            }}
+          />
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-dark-900 via-dark-900/85 to-dark-900/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-dark-900/60" />
+        </div>
+
         {/* Background layers */}
         <div className="absolute inset-0 bg-grid" />
-        <div className="absolute inset-0 bg-mesh" />
 
         {/* Floating orbs - parallax */}
         <FloatingOrb className="w-96 h-96 bg-lime-400 top-20 -left-48" delay={0} />
-        <FloatingOrb className="w-72 h-72 bg-lime-500 bottom-20 right-10" delay={1.5} />
         <FloatingOrb className="w-40 h-40 bg-emerald-400 top-1/2 left-1/3" delay={3} />
 
         {/* Decorative lines */}
@@ -230,20 +253,52 @@ export default function Home() {
         </div>
       </section>
 
-      {/* === SPORTS BAR === */}
-      <section className="relative py-16 border-y border-dark-500/20 bg-dark-800/30">
+      {/* === SPORTS SHOWCASE === */}
+      <section className="relative py-20 border-y border-dark-500/20 bg-dark-800/30 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-            {sports.map((sport, i) => (
+          <div className="text-center mb-12">
+            <span className="text-lime-400 font-display font-bold text-xs uppercase tracking-[0.2em] mb-3 block">
+              Disciplinas
+            </span>
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-smoke-100">
+              Encuentra tu <span className="text-lime-400 text-glow">deporte</span>
+            </h2>
+          </div>
+
+          {/* All sports grid 3x2 */}
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {[
+              { name: 'Running', img: runningImg, link: '/events?sport=running' },
+              { name: 'Ciclismo', img: ciclismoImg, link: '/events?sport=ciclismo' },
+              { name: 'Natacion', img: natacionImg, link: '/events?sport=natacion' },
+              { name: 'Padel', img: padelImg, link: '/events?sport=padel' },
+              { name: 'Trail', img: trailImg, link: '/events?sport=trail' },
+              { name: 'Futbol', img: futbolImg, link: '/events?sport=futbol' },
+            ].map((sport, i) => (
               <Link
-                to={`/events?sport=${sport.name.toLowerCase()}`}
+                to={sport.link}
                 key={i}
-                className="group flex flex-col items-center gap-3 py-5 rounded-xl border border-transparent hover:border-dark-500/50 hover:bg-dark-700/30 transition-all duration-300"
+                className="group relative h-52 rounded-2xl overflow-hidden border border-dark-500/30 hover:border-lime-400/30 transition-all duration-500"
               >
-                <div className="w-12 h-12 rounded-xl bg-dark-700 border border-dark-500/50 flex items-center justify-center text-smoke-400 group-hover:text-lime-400 group-hover:border-lime-400/20 group-hover:bg-lime-400/5 transition-all duration-300">
-                  {sport.icon}
+                {/* Image with zoom on hover */}
+                <img
+                  src={sport.img}
+                  alt={sport.name}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/40 to-transparent group-hover:via-dark-900/20 transition-all duration-500" />
+                {/* Lime glow on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-t from-lime-400/10 to-transparent" />
+                {/* Label */}
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-display font-bold text-xl text-smoke-100 group-hover:text-lime-400 transition-colors duration-300">
+                      {sport.name}
+                    </span>
+                    <ArrowRight className="w-5 h-5 text-smoke-400 group-hover:text-lime-400 group-hover:translate-x-1 transition-all duration-300" />
+                  </div>
                 </div>
-                <span className="text-xs font-display font-bold text-smoke-400 group-hover:text-lime-400 transition-colors duration-300">{sport.name}</span>
               </Link>
             ))}
           </div>
@@ -319,7 +374,17 @@ export default function Home() {
       </section>
 
       {/* === CTA SECTION === */}
-      <section className="relative py-32">
+      <section className="relative py-32 overflow-hidden">
+        {/* CTA background image */}
+        <div className="absolute inset-0">
+          <img
+            src={ctaImg}
+            alt=""
+            className="absolute w-full h-full object-cover opacity-30 animate-scale-subtle"
+          />
+          <div className="absolute inset-0 bg-dark-900/70" />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/50 to-dark-900" />
+        </div>
         <div className="absolute inset-0 bg-mesh" />
         {/* Radial glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-lime-400/5 rounded-full blur-3xl" />

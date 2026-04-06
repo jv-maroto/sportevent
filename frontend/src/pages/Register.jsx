@@ -90,11 +90,13 @@ export default function Register() {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
+                pattern="(?=.*[A-Z])(?=.*\d).{8,}"
+                title="Minimo 8 caracteres, una mayuscula y un numero"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="input-dark"
-                placeholder="Minimo 6 caracteres"
+                placeholder="Minimo 8 caracteres, 1 mayuscula, 1 numero"
               />
             </div>
 

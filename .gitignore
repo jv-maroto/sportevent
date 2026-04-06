@@ -21,6 +21,9 @@ frontend/build/
 .env.local
 .env.production
 
+# Claude Code (config local)
+.claude/settings.local.json
+
 # IDE
 .vscode/
 .idea/

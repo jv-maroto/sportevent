@@ -13,6 +13,7 @@ class Result(Base):
     score = Column(Float, nullable=True)  # Puntuacion (para torneos)
     notes = Column(String(500), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # FK
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)

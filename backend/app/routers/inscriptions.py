@@ -1,8 +1,11 @@
+import csv
+import io
 import logging
 from typing import List
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
@@ -90,6 +93,11 @@ def create_checkout(
         inscription.status = "confirmed"
         db.commit()
         return CheckoutResponse(checkout_url="free", session_id="dev_mode")
+
+    # Validar que Stripe esta configurado antes de crear sesion de pago
+    if not settings.STRIPE_SECRET_KEY:
+        logger.error("STRIPE_SECRET_KEY no configurada, no se puede procesar el pago")
+        raise HTTPException(status_code=503, detail="El sistema de pagos no esta configurado")
 
     # Crear sesion de Stripe Checkout
     try:
@@ -179,3 +187,67 @@ def event_inscriptions(
         joinedload(Inscription.user), joinedload(Inscription.event)
     ).filter(Inscription.event_id == event_id).all()
     return [_inscription_to_response(i) for i in inscriptions]
+
+
+@router.delete("/{inscription_id}", status_code=status.HTTP_204_NO_CONTENT)
+def cancel_inscription(
+    inscription_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Cancelar una inscripcion (solo antes de que empiece el evento)."""
+    inscription = db.query(Inscription).options(
+        joinedload(Inscription.event)
+    ).filter(
+        Inscription.id == inscription_id,
+        Inscription.user_id == current_user.id,
+    ).first()
+    if not inscription:
+        raise HTTPException(status_code=404, detail="Inscripcion no encontrada")
+
+    if inscription.status == "cancelled":
+        raise HTTPException(status_code=400, detail="La inscripcion ya esta cancelada")
+
+    if inscription.event and inscription.event.status == "finished":
+        raise HTTPException(status_code=400, detail="No se puede cancelar una inscripcion de un evento finalizado")
+
+    inscription.status = "cancelled"
+    db.commit()
+    logger.info("Inscripcion cancelada: id=%d usuario=%d evento=%d", inscription_id, current_user.id, inscription.event_id)
+
+
+@router.get("/event/{event_id}/csv")
+def export_inscriptions_csv(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_organizer),
+):
+    """Exportar inscritos de un evento a CSV (solo organizador)."""
+    event = db.query(Event).filter(Event.id == event_id, Event.organizer_id == current_user.id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Evento no encontrado o no tienes permiso")
+
+    inscriptions_list = db.query(Inscription).options(
+        joinedload(Inscription.user)
+    ).filter(Inscription.event_id == event_id).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["ID", "Nombre", "Email", "Estado", "Importe", "Fecha inscripcion"])
+    for insc in inscriptions_list:
+        writer.writerow([
+            insc.user_id,
+            insc.user.full_name if insc.user else "",
+            insc.user.email if insc.user else "",
+            insc.status,
+            f"{insc.amount_paid:.2f}",
+            insc.created_at.strftime("%Y-%m-%d %H:%M") if insc.created_at else "",
+        ])
+
+    output.seek(0)
+    filename = f"inscritos_{event.title.replace(' ', '_')}_{event_id}.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

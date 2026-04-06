@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     # Base de datos (SQLite por defecto para desarrollo local, PostgreSQL en Docker)
     DATABASE_URL: str = "sqlite:///./sportevent.db"
 
-    # JWT
-    SECRET_KEY: str = "dev_secret_key_cambiar_en_produccion"
+    # JWT — SECRET_KEY es obligatoria en produccion (sin valor por defecto seguro)
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 

@@ -1,13 +1,19 @@
-from fastapi import FastAPI
+import logging
+
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import get_db
 from app.routers import auth, events, inscriptions, results
 
-# Crear tablas en la base de datos (en desarrollo; en produccion usar Alembic)
-Base.metadata.create_all(bind=engine)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
 
 app = FastAPI(
     title="SportEvent API",
@@ -20,8 +26,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Servir imagenes subidas
@@ -35,5 +41,10 @@ app.include_router(results.router)
 
 
 @app.get("/", tags=["Health"])
-def health_check():
-    return {"status": "ok", "app": "SportEvent API", "version": "1.0.0"}
+def health_check(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+        db_status = "ok"
+    except Exception:
+        db_status = "error"
+    return {"status": "ok", "app": "SportEvent API", "version": "1.0.0", "database": db_status}

@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 from typing import List, Optional
@@ -6,13 +7,23 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File,
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
+
+logger = logging.getLogger(__name__)
 from app.core.config import settings
 from app.core.security import get_current_user, require_organizer
 from app.models.user import User
 from app.models.event import Event
-from app.schemas.event import EventCreate, EventUpdate, EventResponse
+from app.schemas.event import EventCreate, EventUpdate, EventResponse, PaginatedEvents
 
 router = APIRouter(prefix="/api/events", tags=["Eventos"])
+
+# Transiciones de status validas: estado_actual -> [estados_permitidos]
+VALID_STATUS_TRANSITIONS = {
+    "draft": ["published", "cancelled"],
+    "published": ["finished", "cancelled"],
+    "finished": [],
+    "cancelled": [],
+}
 
 
 def _event_to_response(event: Event) -> EventResponse:
@@ -47,14 +58,16 @@ def list_my_events(
     return [_event_to_response(e) for e in events]
 
 
-@router.get("/", response_model=List[EventResponse])
+@router.get("/", response_model=PaginatedEvents)
 def list_events(
     sport: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
     search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(12, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
-    """Listar eventos publicos con filtros opcionales."""
+    """Listar eventos publicos con filtros opcionales y paginacion."""
     query = db.query(Event).filter(Event.status == "published")
 
     if sport:
@@ -64,9 +77,19 @@ def list_events(
     if search:
         query = query.filter(Event.title.ilike(f"%{search}%"))
 
+    total = query.count()
+    pages = max(1, (total + page_size - 1) // page_size)
+
     query = query.options(joinedload(Event.organizer), joinedload(Event.inscriptions))
-    events = query.order_by(Event.date.asc()).all()
-    return [_event_to_response(e) for e in events]
+    events = query.order_by(Event.date.asc()).offset((page - 1) * page_size).limit(page_size).all()
+
+    return PaginatedEvents(
+        items=[_event_to_response(e) for e in events],
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=pages,
+    )
 
 
 @router.get("/{event_id}", response_model=EventResponse)
@@ -101,6 +124,7 @@ def create_event(
     db.add(event)
     db.commit()
     db.refresh(event)
+    logger.info("Evento creado: id=%d titulo='%s' por usuario=%d", event.id, event.title, current_user.id)
     return _event_to_response(event)
 
 
@@ -117,11 +141,23 @@ def update_event(
         raise HTTPException(status_code=404, detail="Evento no encontrado o no tienes permiso")
 
     update_data = data.model_dump(exclude_unset=True)
+
+    # Validar transicion de status si se esta cambiando
+    if "status" in update_data:
+        new_status = update_data["status"]
+        allowed = VALID_STATUS_TRANSITIONS.get(event.status, [])
+        if new_status != event.status and new_status not in allowed:
+            raise HTTPException(
+                status_code=400,
+                detail=f"No se puede cambiar de '{event.status}' a '{new_status}'. Transiciones permitidas: {allowed}",
+            )
+
     for field, value in update_data.items():
         setattr(event, field, value)
 
     db.commit()
     db.refresh(event)
+    logger.info("Evento actualizado: id=%d por usuario=%d", event_id, current_user.id)
     return _event_to_response(event)
 
 
@@ -136,6 +172,7 @@ def delete_event(
     if not event:
         raise HTTPException(status_code=404, detail="Evento no encontrado o no tienes permiso")
 
+    logger.info("Evento eliminado: id=%d por usuario=%d", event_id, current_user.id)
     db.delete(event)
     db.commit()
 

@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -5,6 +6,8 @@ from sqlalchemy import case
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
+
+logger = logging.getLogger(__name__)
 from app.core.security import get_current_user, require_organizer
 from app.models.user import User
 from app.models.event import Event
@@ -66,6 +69,7 @@ def create_result(
     db.add(result)
     db.commit()
     db.refresh(result)
+    logger.info("Resultado creado: evento=%d usuario=%d por organizador=%d", data.event_id, data.user_id, current_user.id)
     return _result_to_response(result)
 
 

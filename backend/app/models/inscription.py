@@ -10,8 +10,9 @@ class Inscription(Base):
     id = Column(Integer, primary_key=True, index=True)
     status = Column(String(20), nullable=False, default="pending")  # "pending" | "confirmed" | "cancelled"
     amount_paid = Column(Float, nullable=False, default=0.0)
-    stripe_session_id = Column(String(255), nullable=True)
+    stripe_session_id = Column(String(255), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # FK
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)

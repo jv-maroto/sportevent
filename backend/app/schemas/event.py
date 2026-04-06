@@ -1,6 +1,6 @@
 from pydantic import BaseModel, field_validator
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 
 VALID_RANKING_CRITERIA = ('time', 'score', 'position')
 VALID_STATUSES = ('draft', 'published', 'finished', 'cancelled')
@@ -105,3 +105,11 @@ class EventResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class PaginatedEvents(BaseModel):
+    items: List[EventResponse]
+    total: int
+    page: int
+    page_size: int
+    pages: int

@@ -7,26 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { loadStripe } from '@stripe/stripe-js';
 import { Calendar, MapPin, Users, Tag, Trophy, ArrowLeft, Zap, Clock, Target } from 'lucide-react';
-import runningImg from '../assets/running.jfif';
-import ciclismoImg from '../assets/ciclismo.jfif';
-import natacionImg from '../assets/natacion.jfif';
-import padelImg from '../assets/padel.jfif';
-import futbolImg from '../assets/futbol.jfif';
-import trailImg from '../assets/trail.jfif';
-
-const SPORT_IMAGES = {
-  running: runningImg,
-  ciclismo: ciclismoImg,
-  natacion: natacionImg,
-  padel: padelImg,
-  futbol: futbolImg,
-  trail: trailImg,
-};
-
-function getSportImage(sport) {
-  const key = sport?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  return SPORT_IMAGES[key] || null;
-}
+import { getSportImage } from '../utils/sportImages';
+import { formatDate, formatTime } from '../utils/formatDate';
 
 export default function EventDetail() {
   const { id } = useParams();
@@ -88,26 +70,6 @@ export default function EventDetail() {
     } finally {
       setEnrolling(false);
     }
-  };
-
-  const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const formatTime = (seconds) => {
-    if (!seconds) return '-';
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    if (h > 0) return `${h}h ${m}m ${s}s`;
-    return `${m}m ${s}s`;
   };
 
   if (loading) {

@@ -63,18 +63,23 @@ export default function Navbar() {
 
                 <div className="w-px h-5 bg-dark-500 mx-2" />
 
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-dark-700 rounded-full border border-dark-500">
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-dark-700 rounded-full border border-dark-500 hover:border-lime-400/30 transition-all"
+                >
                   <div className="w-5 h-5 bg-lime-400/20 rounded-full flex items-center justify-center">
                     <User className="w-3 h-3 text-lime-400" />
                   </div>
                   <span className="text-xs font-medium text-smoke-200 max-w-[100px] truncate">
                     {user.full_name}
                   </span>
-                </div>
+                </Link>
 
                 <button
+                  type="button"
                   onClick={handleLogout}
                   className="flex items-center gap-1.5 px-3 py-2 text-sm text-smoke-400 hover:text-red-400 transition-colors duration-300 cursor-pointer"
+                  aria-label="Cerrar sesion"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -99,8 +104,11 @@ export default function Navbar() {
 
           {/* Mobile toggle */}
           <button
+            type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden text-smoke-300 hover:text-lime-400 transition-colors cursor-pointer"
+            aria-label={mobileOpen ? 'Cerrar menu' : 'Abrir menu'}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -108,7 +116,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden py-4 border-t border-dark-500/50 space-y-1 animate-fade-in">
+          <nav className="md:hidden py-4 border-t border-dark-500/50 space-y-1 animate-fade-in" aria-label="Menu mobile">
             <Link to="/events" onClick={() => setMobileOpen(false)} className="block px-4 py-3 text-smoke-300 hover:text-lime-400 hover:bg-dark-700 rounded-lg transition-all">
               Eventos
             </Link>
@@ -141,7 +149,7 @@ export default function Navbar() {
                 </Link>
               </>
             )}
-          </div>
+          </nav>
         )}
       </div>
     </nav>

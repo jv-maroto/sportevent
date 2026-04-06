@@ -4,11 +4,45 @@ import { useAuth } from '../context/AuthContext';
 import { getEventInscriptions } from '../services/inscriptions';
 import { createResult } from '../services/results';
 import { getMyEvents, updateEvent } from '../services/events';
+import { formatDateShort } from '../utils/formatDate';
 import toast from 'react-hot-toast';
 import {
   LayoutDashboard, CalendarPlus, Users, Euro, Eye, Trophy,
   CheckCircle, Send, ChevronDown, ChevronUp, Zap, TrendingUp,
+  AlertTriangle,
 } from 'lucide-react';
+
+function ConfirmDialog({ message, onConfirm, onCancel }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-dark-900/80 backdrop-blur-sm">
+      <div className="bg-dark-800 border border-dark-500/50 rounded-2xl p-6 max-w-sm mx-4 animate-fade-up">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5 text-amber-400" />
+          </div>
+          <h3 className="font-display font-bold text-smoke-100">Confirmar accion</h3>
+        </div>
+        <p className="text-smoke-400 text-sm font-body mb-6">{message}</p>
+        <div className="flex gap-3 justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 text-sm font-display font-bold text-smoke-400 bg-dark-700 border border-dark-500 rounded-lg hover:bg-dark-600 transition-all cursor-pointer"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="btn-primary px-4 py-2 text-sm cursor-pointer"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -17,6 +51,7 @@ export default function Dashboard() {
   const [expandedEvent, setExpandedEvent] = useState(null);
   const [inscriptions, setInscriptions] = useState({});
   const [resultForm, setResultForm] = useState({ user_id: '', time_seconds: '', score: '', position: '' });
+  const [confirmAction, setConfirmAction] = useState(null);
 
   useEffect(() => {
     loadMyEvents();
@@ -49,24 +84,34 @@ export default function Dashboard() {
     }
   };
 
-  const handlePublish = async (eventId) => {
-    try {
-      await updateEvent(eventId, { status: 'published' });
-      toast.success('Evento publicado');
-      loadMyEvents();
-    } catch {
-      toast.error('Error al publicar');
-    }
+  const handlePublish = (eventId) => {
+    setConfirmAction({
+      message: 'Estas seguro de que quieres publicar este evento? Sera visible para todos los usuarios.',
+      action: async () => {
+        try {
+          await updateEvent(eventId, { status: 'published' });
+          toast.success('Evento publicado');
+          loadMyEvents();
+        } catch {
+          toast.error('Error al publicar');
+        }
+      },
+    });
   };
 
-  const handleFinish = async (eventId) => {
-    try {
-      await updateEvent(eventId, { status: 'finished' });
-      toast.success('Evento finalizado');
-      loadMyEvents();
-    } catch {
-      toast.error('Error al finalizar');
-    }
+  const handleFinish = (eventId) => {
+    setConfirmAction({
+      message: 'Estas seguro de que quieres finalizar este evento? No se podra revertir.',
+      action: async () => {
+        try {
+          await updateEvent(eventId, { status: 'finished' });
+          toast.success('Evento finalizado');
+          loadMyEvents();
+        } catch {
+          toast.error('Error al finalizar');
+        }
+      },
+    });
   };
 
   const handleAddResult = async (eventId, rankingCriteria) => {
@@ -99,10 +144,24 @@ export default function Dashboard() {
   const totalInscriptions = events.reduce((sum, e) => sum + (e.max_capacity - e.available_spots), 0);
   const totalRevenue = events.reduce((sum, e) => sum + e.price * (e.max_capacity - e.available_spots), 0);
 
+  // Obtener inscritos confirmados de un evento para el selector de resultados
+  const getConfirmedUsers = (eventId) => {
+    return (inscriptions[eventId] || []).filter((i) => i.status === 'confirmed');
+  };
+
   return (
     <div className="min-h-screen bg-dark-900 pt-24 pb-16">
       <div className="grain-overlay" />
       <div className="fixed inset-0 bg-grid opacity-20" />
+
+      {/* Dialogo de confirmacion */}
+      {confirmAction && (
+        <ConfirmDialog
+          message={confirmAction.message}
+          onConfirm={() => { confirmAction.action(); setConfirmAction(null); }}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -126,7 +185,7 @@ export default function Dashboard() {
           {[
             { icon: <Zap className="w-5 h-5" />, label: 'Eventos', value: totalEvents, color: 'text-blue-400', bg: 'bg-blue-400/10' },
             { icon: <Users className="w-5 h-5" />, label: 'Inscritos', value: totalInscriptions, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-            { icon: <TrendingUp className="w-5 h-5" />, label: 'Ingresos', value: `${totalRevenue.toFixed(2)} €`, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+            { icon: <TrendingUp className="w-5 h-5" />, label: 'Ingresos', value: `${totalRevenue.toFixed(2)} EUR`, color: 'text-amber-400', bg: 'bg-amber-400/10' },
           ].map((stat, i) => (
             <div key={i} className="bg-dark-800 border border-dark-500/50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-3">
@@ -161,6 +220,10 @@ export default function Dashboard() {
                 <div
                   onClick={() => toggleEventDetails(event.id)}
                   className="p-5 flex justify-between items-center cursor-pointer hover:bg-dark-700/50 transition-all duration-300"
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={expandedEvent === event.id}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleEventDetails(event.id); } }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-dark-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -169,7 +232,7 @@ export default function Dashboard() {
                     <div>
                       <h3 className="font-display font-bold text-smoke-100 text-sm">{event.title}</h3>
                       <p className="text-xs text-smoke-500 font-body mt-0.5">
-                        {event.sport} · {new Date(event.date).toLocaleDateString('es-ES')} · {event.location}
+                        {event.sport} · {formatDateShort(event.date)} · {event.location}
                       </p>
                     </div>
                   </div>
@@ -194,12 +257,20 @@ export default function Dashboard() {
                     {/* Actions */}
                     <div className="flex gap-3 flex-wrap">
                       {event.status === 'draft' && (
-                        <button onClick={() => handlePublish(event.id)} className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-lg text-xs font-display font-bold uppercase tracking-wider hover:bg-emerald-500/20 transition-all cursor-pointer">
+                        <button
+                          type="button"
+                          onClick={() => handlePublish(event.id)}
+                          className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-lg text-xs font-display font-bold uppercase tracking-wider hover:bg-emerald-500/20 transition-all cursor-pointer"
+                        >
                           <Send className="w-3.5 h-3.5" /> Publicar
                         </button>
                       )}
                       {event.status === 'published' && (
-                        <button onClick={() => handleFinish(event.id)} className="flex items-center gap-1.5 bg-dark-600 text-smoke-300 border border-dark-500 px-4 py-2 rounded-lg text-xs font-display font-bold uppercase tracking-wider hover:bg-dark-500 transition-all cursor-pointer">
+                        <button
+                          type="button"
+                          onClick={() => handleFinish(event.id)}
+                          className="flex items-center gap-1.5 bg-dark-600 text-smoke-300 border border-dark-500 px-4 py-2 rounded-lg text-xs font-display font-bold uppercase tracking-wider hover:bg-dark-500 transition-all cursor-pointer"
+                        >
                           <CheckCircle className="w-3.5 h-3.5" /> Finalizar
                         </button>
                       )}
@@ -237,7 +308,7 @@ export default function Dashboard() {
                                       {insc.status}
                                     </span>
                                   </td>
-                                  <td className="px-4 py-3 text-smoke-300 font-body">{insc.amount_paid.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-smoke-300 font-body">{insc.amount_paid.toFixed(2)} EUR</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -257,13 +328,20 @@ export default function Dashboard() {
                         </h4>
                         <div className="flex flex-wrap gap-3 items-end">
                           <div>
-                            <label className="block text-[10px] text-smoke-500 mb-1 font-display uppercase tracking-wider">ID Usuario</label>
-                            <input
-                              type="number"
+                            <label className="block text-[10px] text-smoke-500 mb-1 font-display uppercase tracking-wider">Participante</label>
+                            <select
                               value={resultForm.user_id}
                               onChange={(e) => setResultForm({ ...resultForm, user_id: e.target.value })}
-                              className="input-dark w-24 py-2 text-sm"
-                            />
+                              className="input-dark w-48 py-2 text-sm cursor-pointer"
+                              aria-label="Seleccionar participante"
+                            >
+                              <option value="">Seleccionar...</option>
+                              {getConfirmedUsers(event.id).map((insc) => (
+                                <option key={insc.user_id} value={insc.user_id}>
+                                  {insc.user_name} (ID: {insc.user_id})
+                                </option>
+                              ))}
+                            </select>
                           </div>
                           {event.ranking_criteria === 'time' && (
                             <div>
@@ -301,6 +379,7 @@ export default function Dashboard() {
                             </div>
                           )}
                           <button
+                            type="button"
                             onClick={() => handleAddResult(event.id, event.ranking_criteria)}
                             className="btn-primary py-2 px-5 text-xs"
                           >

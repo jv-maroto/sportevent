@@ -10,6 +10,7 @@ import EventCreate from './pages/EventCreate';
 import MyInscriptions from './pages/MyInscriptions';
 import Dashboard from './pages/Dashboard';
 import InscriptionSuccess from './pages/InscriptionSuccess';
+import Profile from './pages/Profile';
 
 export default function App() {
   return (
@@ -35,6 +36,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <MyInscriptions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />

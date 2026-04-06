@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { register } from '../services/auth';
 import toast from 'react-hot-toast';
-import { UserPlus, ArrowRight, Shield, Users } from 'lucide-react';
+import { UserPlus, ArrowRight, Shield, Users, AlertCircle, Check } from 'lucide-react';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -13,12 +13,51 @@ export default function Register() {
     role: 'participant',
     phone: '',
   });
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { loginUser } = useAuth();
   const navigate = useNavigate();
 
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'full_name':
+        return value.trim().length < 2 ? 'Minimo 2 caracteres' : '';
+      case 'email':
+        return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Email no valido' : '';
+      case 'password': {
+        if (value.length < 8) return 'Minimo 8 caracteres';
+        if (!/[A-Z]/.test(value)) return 'Debe incluir una mayuscula';
+        if (!/\d/.test(value)) return 'Debe incluir un numero';
+        return '';
+      }
+      default:
+        return '';
+    }
+  };
+
+  const handleChange = (name, value) => {
+    setForm({ ...form, [name]: value });
+    if (errors[name] !== undefined) {
+      setErrors({ ...errors, [name]: validateField(name, value) });
+    }
+  };
+
+  const handleBlur = (name) => {
+    setErrors({ ...errors, [name]: validateField(name, form[name]) });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = {};
+    ['full_name', 'email', 'password'].forEach((field) => {
+      const error = validateField(field, form[field]);
+      if (error) newErrors[field] = error;
+    });
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
     try {
       const data = await register(form);
@@ -31,6 +70,29 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  const fieldStatus = (name) => {
+    if (errors[name] === undefined) return null;
+    if (errors[name]) return (
+      <p className="flex items-center gap-1 text-red-400 text-xs mt-1 font-body">
+        <AlertCircle className="w-3 h-3" />
+        {errors[name]}
+      </p>
+    );
+    return (
+      <p className="flex items-center gap-1 text-emerald-400 text-xs mt-1 font-body">
+        <Check className="w-3 h-3" />
+        Correcto
+      </p>
+    );
+  };
+
+  // Indicadores de fuerza de contrasena
+  const passwordChecks = [
+    { label: '8+ caracteres', ok: form.password.length >= 8 },
+    { label: '1 mayuscula', ok: /[A-Z]/.test(form.password) },
+    { label: '1 numero', ok: /\d/.test(form.password) },
+  ];
 
   return (
     <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4 pt-20 pb-10">
@@ -63,10 +125,12 @@ export default function Register() {
                 type="text"
                 required
                 value={form.full_name}
-                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                className="input-dark"
+                onChange={(e) => handleChange('full_name', e.target.value)}
+                onBlur={() => handleBlur('full_name')}
+                className={`input-dark ${errors.full_name ? 'border-red-400/50' : errors.full_name === '' ? 'border-emerald-400/30' : ''}`}
                 placeholder="Tu nombre"
               />
+              {fieldStatus('full_name')}
             </div>
 
             <div>
@@ -77,27 +141,38 @@ export default function Register() {
                 type="email"
                 required
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="input-dark"
+                onChange={(e) => handleChange('email', e.target.value)}
+                onBlur={() => handleBlur('email')}
+                className={`input-dark ${errors.email ? 'border-red-400/50' : errors.email === '' ? 'border-emerald-400/30' : ''}`}
                 placeholder="tu@email.com"
               />
+              {fieldStatus('email')}
             </div>
 
             <div>
               <label className="block text-xs font-display font-semibold text-smoke-400 uppercase tracking-wider mb-2">
-                Contraseña
+                Contrasena
               </label>
               <input
                 type="password"
                 required
-                minLength={8}
-                pattern="(?=.*[A-Z])(?=.*\d).{8,}"
-                title="Minimo 8 caracteres, una mayuscula y un numero"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="input-dark"
-                placeholder="Minimo 8 caracteres, 1 mayuscula, 1 numero"
+                onChange={(e) => handleChange('password', e.target.value)}
+                onBlur={() => handleBlur('password')}
+                className={`input-dark ${errors.password ? 'border-red-400/50' : errors.password === '' ? 'border-emerald-400/30' : ''}`}
+                placeholder="Minimo 8 caracteres"
               />
+              {form.password.length > 0 && (
+                <div className="flex gap-3 mt-2">
+                  {passwordChecks.map((check) => (
+                    <span key={check.label} className={`text-[10px] font-body ${check.ok ? 'text-emerald-400' : 'text-smoke-500'}`}>
+                      {check.ok ? <Check className="w-3 h-3 inline mr-0.5" /> : null}
+                      {check.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {fieldStatus('password')}
             </div>
 
             <div>
@@ -107,7 +182,7 @@ export default function Register() {
               <input
                 type="tel"
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onChange={(e) => handleChange('phone', e.target.value)}
                 className="input-dark"
                 placeholder="600 123 456"
               />

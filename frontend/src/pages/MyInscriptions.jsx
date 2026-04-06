@@ -1,18 +1,39 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getMyInscriptions } from '../services/inscriptions';
-import { Ticket, CheckCircle, Clock, XCircle, ArrowRight } from 'lucide-react';
+import { getMyInscriptions, cancelInscription } from '../services/inscriptions';
+import { formatDateShort } from '../utils/formatDate';
+import toast from 'react-hot-toast';
+import { Ticket, CheckCircle, Clock, XCircle, ArrowRight, X } from 'lucide-react';
 
 export default function MyInscriptions() {
   const [inscriptions, setInscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(null);
 
-  useEffect(() => {
+  const loadInscriptions = () => {
     getMyInscriptions()
       .then(setInscriptions)
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadInscriptions();
   }, []);
+
+  const handleCancel = async (inscriptionId) => {
+    if (!confirm('Estas seguro de que quieres cancelar esta inscripcion?')) return;
+    setCancelling(inscriptionId);
+    try {
+      await cancelInscription(inscriptionId);
+      toast.success('Inscripcion cancelada');
+      loadInscriptions();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Error al cancelar');
+    } finally {
+      setCancelling(null);
+    }
+  };
 
   const statusConfig = {
     confirmed: { label: 'Confirmada', icon: <CheckCircle className="w-3.5 h-3.5" />, className: 'badge-confirmed' },
@@ -56,15 +77,15 @@ export default function MyInscriptions() {
           <div className="space-y-3">
             {inscriptions.map((insc, i) => {
               const status = statusConfig[insc.status] || statusConfig.pending;
+              const canCancel = insc.status !== 'cancelled';
               return (
-                <Link
+                <div
                   key={insc.id}
-                  to={`/events/${insc.event_id}`}
-                  className="block bg-dark-800 border border-dark-500/50 rounded-xl p-5 hover:border-lime-400/20 transition-all duration-500 group opacity-0 animate-fade-up"
+                  className="bg-dark-800 border border-dark-500/50 rounded-xl p-5 hover:border-lime-400/20 transition-all duration-500 group opacity-0 animate-fade-up"
                   style={{ animationDelay: `${0.1 + i * 0.08}s` }}
                 >
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-4">
+                    <Link to={`/events/${insc.event_id}`} className="flex items-center gap-4 flex-1">
                       <div className="w-10 h-10 bg-dark-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-lime-400/10 transition-colors duration-300">
                         <Ticket className="w-4 h-4 text-smoke-500 group-hover:text-lime-400 transition-colors duration-300" />
                       </div>
@@ -73,21 +94,37 @@ export default function MyInscriptions() {
                           {insc.event_title}
                         </h3>
                         <p className="text-[11px] text-smoke-500 font-body mt-0.5">
-                          Inscrito el {new Date(insc.created_at).toLocaleDateString('es-ES')}
+                          Inscrito el {formatDateShort(insc.created_at)}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                     <div className="flex items-center gap-4">
                       <span className="text-sm font-display font-bold text-smoke-200">
-                        {insc.amount_paid === 0 ? 'Gratis' : `${insc.amount_paid.toFixed(2)} €`}
+                        {insc.amount_paid === 0 ? 'Gratis' : `${insc.amount_paid.toFixed(2)} EUR`}
                       </span>
                       <span className={`flex items-center gap-1.5 text-[10px] font-display font-bold uppercase tracking-wider px-3 py-1 rounded-full ${status.className}`}>
                         {status.icon}
                         {status.label}
                       </span>
+                      {canCancel && (
+                        <button
+                          type="button"
+                          onClick={() => handleCancel(insc.id)}
+                          disabled={cancelling === insc.id}
+                          className="p-1.5 rounded-lg text-smoke-500 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer disabled:opacity-50"
+                          title="Cancelar inscripcion"
+                          aria-label="Cancelar inscripcion"
+                        >
+                          {cancelling === insc.id ? (
+                            <div className="w-4 h-4 border-2 border-smoke-500/30 border-t-smoke-500 rounded-full animate-spin" />
+                          ) : (
+                            <X className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>

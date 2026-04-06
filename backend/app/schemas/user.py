@@ -52,6 +52,35 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+    @field_validator('full_name')
+    @classmethod
+    def validate_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and len(v.strip()) < 2:
+            raise ValueError('El nombre debe tener al menos 2 caracteres')
+        return v.strip() if v else v
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator('new_password')
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError('La contrasena debe tener al menos 8 caracteres')
+        if not any(c.isupper() for c in v):
+            raise ValueError('La contrasena debe contener al menos una mayuscula')
+        if not any(c.isdigit() for c in v):
+            raise ValueError('La contrasena debe contener al menos un numero')
+        return v
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

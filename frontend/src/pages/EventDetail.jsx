@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getEvent } from '../services/events';
 import { getEventRanking } from '../services/results';
 import { createCheckout } from '../services/inscriptions';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { loadStripe } from '@stripe/stripe-js';
 import { Calendar, MapPin, Users, Tag, Trophy, ArrowLeft, Zap, Clock, Target } from 'lucide-react';
 import runningImg from '../assets/running.jfif';
 import ciclismoImg from '../assets/ciclismo.jfif';
@@ -67,8 +68,20 @@ export default function EventDetail() {
       if (data.checkout_url === 'free') {
         toast.success('Inscripcion confirmada');
         loadData();
+      } else if (data.session_id && data.session_id !== 'dev_mode') {
+        const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+        if (stripeKey && !stripeKey.startsWith('pk_test_tu_')) {
+          const stripe = await loadStripe(stripeKey);
+          const { error } = await stripe.redirectToCheckout({ sessionId: data.session_id });
+          if (error) {
+            toast.error(error.message);
+          }
+        } else {
+          window.location.href = data.checkout_url;
+        }
       } else {
-        window.location.href = data.checkout_url;
+        toast.success('Inscripcion confirmada (modo desarrollo)');
+        loadData();
       }
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Error al inscribirse');

@@ -1,0 +1,35 @@
+==========================================
+  SPORTEVENT - USUARIOS DE PRUEBA
+==========================================
+
+ORGANIZADORES:
+  organizador@test.com  / Test1234  (organizer) - 9 eventos creados
+  laura@test.com        / Test1234  (organizer) - 1 evento creado
+
+PARTICIPANTES:
+  ana@test.com          / Test1234  (participant) - inscrita en 8 eventos
+  pedro@test.com        / Test1234  (participant) - inscrito en 6 eventos
+  maria@test.com        / Test1234  (participant) - inscrita en 5 eventos
+  luis@test.com         / Test1234  (participant) - inscrito en 6 eventos
+  elena@test.com        / Test1234  (participant) - inscrita en 5 eventos
+  jorge@test.com        / Test1234  (participant) - inscrito en 5 eventos
+
+USUARIO LIMPIO (sin inscripciones):
+  test@test.com         / Test1234  (participant) - sin inscripciones
+
+==========================================
+  DATOS DE PRUEBA
+==========================================
+  10 eventos (7 published + 1 draft + 1 finished + 1 en curso)
+  39 inscripciones
+  17 resultados (3 eventos con clasificacion)
+
+==========================================
+  STRIPE TEST
+==========================================
+  Tarjeta de prueba: 4242 4242 4242 4242
+  Fecha: cualquier fecha futura
+  CVC: cualquier 3 digitos
+
+  Tarjeta rechazada: 4000 0000 0000 0002
+  Tarjeta con 3D Secure: 4000 0025 0000 3155

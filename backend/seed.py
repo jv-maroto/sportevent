@@ -23,18 +23,19 @@ def seed():
 
     # ==================== USUARIOS ====================
     users = [
-        User(email="organizador@test.com", full_name="Carlos Organizador", hashed_password=hash_password("123456"), role="organizer", phone="600111222"),
-        User(email="ana@test.com", full_name="Ana Garcia", hashed_password=hash_password("123456"), role="participant", phone="600333444"),
-        User(email="pedro@test.com", full_name="Pedro Lopez", hashed_password=hash_password("123456"), role="participant", phone="600555666"),
-        User(email="maria@test.com", full_name="Maria Rodriguez", hashed_password=hash_password("123456"), role="participant"),
-        User(email="luis@test.com", full_name="Luis Martinez", hashed_password=hash_password("123456"), role="participant"),
-        User(email="elena@test.com", full_name="Elena Fernandez", hashed_password=hash_password("123456"), role="participant"),
-        User(email="jorge@test.com", full_name="Jorge Sanchez", hashed_password=hash_password("123456"), role="participant"),
-        User(email="laura@test.com", full_name="Laura Diaz", hashed_password=hash_password("123456"), role="organizer", phone="600777888"),
+        User(email="organizador@test.com", full_name="Carlos Organizador", hashed_password=hash_password("Test1234"), role="organizer", phone="600111222"),
+        User(email="ana@test.com", full_name="Ana Garcia", hashed_password=hash_password("Test1234"), role="participant", phone="600333444"),
+        User(email="pedro@test.com", full_name="Pedro Lopez", hashed_password=hash_password("Test1234"), role="participant", phone="600555666"),
+        User(email="maria@test.com", full_name="Maria Rodriguez", hashed_password=hash_password("Test1234"), role="participant"),
+        User(email="luis@test.com", full_name="Luis Martinez", hashed_password=hash_password("Test1234"), role="participant"),
+        User(email="elena@test.com", full_name="Elena Fernandez", hashed_password=hash_password("Test1234"), role="participant"),
+        User(email="jorge@test.com", full_name="Jorge Sanchez", hashed_password=hash_password("Test1234"), role="participant"),
+        User(email="laura@test.com", full_name="Laura Diaz", hashed_password=hash_password("Test1234"), role="organizer", phone="600777888"),
+        User(email="test@test.com", full_name="Test Usuario", hashed_password=hash_password("Test1234"), role="participant", phone="600999000"),
     ]
     db.add_all(users)
     db.flush()
-    # IDs: 1=Carlos(org), 2=Ana, 3=Pedro, 4=Maria, 5=Luis, 6=Elena, 7=Jorge, 8=Laura(org)
+    # IDs: 1=Carlos(org), 2=Ana, 3=Pedro, 4=Maria, 5=Luis, 6=Elena, 7=Jorge, 8=Laura(org), 9=Test
 
     # ==================== EVENTOS ====================
     now = datetime.now(timezone.utc)
@@ -190,14 +191,15 @@ def seed():
     print("=" * 50)
     print()
     print("  USUARIOS:")
-    print("  organizador@test.com  / 123456  (organizer)")
-    print("  ana@test.com          / 123456  (participant)")
-    print("  pedro@test.com        / 123456  (participant)")
-    print("  maria@test.com        / 123456  (participant)")
-    print("  luis@test.com         / 123456  (participant)")
-    print("  elena@test.com        / 123456  (participant)")
-    print("  jorge@test.com        / 123456  (participant)")
-    print("  laura@test.com        / 123456  (organizer)")
+    print("  organizador@test.com  / Test1234  (organizer)")
+    print("  ana@test.com          / Test1234  (participant)")
+    print("  pedro@test.com        / Test1234  (participant)")
+    print("  maria@test.com        / Test1234  (participant)")
+    print("  luis@test.com         / Test1234  (participant)")
+    print("  elena@test.com        / Test1234  (participant)")
+    print("  jorge@test.com        / Test1234  (participant)")
+    print("  laura@test.com        / Test1234  (organizer)")
+    print("  test@test.com         / Test1234  (participant) [SIN INSCRIPCIONES]")
     print()
     print("  10 eventos (7 published + 1 draft + 1 finished + 1 en curso)")
     print("  39 inscripciones")

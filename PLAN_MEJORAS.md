@@ -15,40 +15,40 @@ El proyecto tiene la funcionalidad base completa: auth con JWT, CRUD de eventos,
 - [ ] Agregar rate limiting en endpoints de login y registro (SlowAPI)
 
 ### 1.2 Backend
-- [ ] Eliminar `Base.metadata.create_all()` de `main.py` — usar solo Alembic
-- [ ] Crear migracion inicial de Alembic (`alembic revision --autogenerate`)
-- [ ] Mover SECRET_KEY a variable de entorno obligatoria (sin valor por defecto)
-- [ ] Agregar logging estructurado en todos los routers
-- [ ] Configurar pool de conexiones para PostgreSQL (`pool_pre_ping`, `pool_size`)
-- [ ] Restringir CORS a metodos especificos (`GET, POST, PUT, DELETE`)
+- [x] Eliminar `Base.metadata.create_all()` de `main.py` — usar solo Alembic
+- [x] Crear migracion inicial de Alembic (`alembic.ini` + `alembic/versions/`)
+- [x] Mover SECRET_KEY a variable de entorno obligatoria (sin valor por defecto)
+- [x] Agregar logging estructurado en todos los routers
+- [x] Configurar pool de conexiones para PostgreSQL (`pool_pre_ping`, `pool_size`)
+- [x] Restringir CORS a metodos especificos (`GET, POST, PUT, DELETE`)
 
 ### 1.3 Stripe
-- [ ] Validar que claves Stripe estan configuradas antes de aceptar pagos
+- [x] Validar que claves Stripe estan configuradas antes de aceptar pagos
 - [ ] Agregar endpoint para cancelar inscripcion (con reembolso via Stripe Refunds)
-- [ ] Indexar `stripe_session_id` en modelo Inscription para busquedas rapidas
+- [x] Indexar `stripe_session_id` en modelo Inscription para busquedas rapidas
 
 ---
 
 ## Fase 2 — Funcionalidad (Prioridad media)
 
 ### 2.1 Gestion de eventos
-- [ ] Editar evento (el organizador actualmente solo puede crear, publicar y finalizar)
-- [ ] Agregar campo `updated_at` a modelos Event, Inscription y Result
-- [ ] Validar transiciones de status (draft -> published -> finished, no saltar pasos)
-- [ ] Paginacion en listado de eventos (`limit` + `offset` o cursor-based)
+- [x] Editar evento (el organizador actualmente solo puede crear, publicar y finalizar)
+- [x] Agregar campo `updated_at` a modelos Inscription y Result
+- [x] Validar transiciones de status (draft -> published -> finished, no saltar pasos)
+- [x] Paginacion en listado de eventos (`limit` + `offset` con page/page_size)
 
 ### 2.2 Perfil de usuario
-- [ ] Pagina de perfil: ver y editar nombre, telefono, email
-- [ ] Cambiar contrasena desde el perfil
-- [ ] Historial de inscripciones y resultados del usuario
+- [x] Pagina de perfil: ver y editar nombre, telefono, email
+- [x] Cambiar contrasena desde el perfil
+- [x] Historial de inscripciones y resultados del usuario
 
 ### 2.3 Inscripciones
-- [ ] Permitir cancelar inscripcion (antes de que empiece el evento)
+- [x] Permitir cancelar inscripcion (antes de que empiece el evento)
 - [ ] Notificacion por email al confirmar inscripcion
-- [ ] Exportar listado de inscritos a CSV (para organizadores)
+- [x] Exportar listado de inscritos a CSV (para organizadores)
 
 ### 2.4 Resultados
-- [ ] Selector de participante por nombre (no por ID) en Dashboard
+- [x] Selector de participante por nombre (no por ID) en Dashboard
 - [ ] Importacion masiva de resultados via CSV
 - [ ] Estadisticas del evento (tiempo medio, mejor tiempo, participantes)
 
@@ -57,27 +57,27 @@ El proyecto tiene la funcionalidad base completa: auth con JWT, CRUD de eventos,
 ## Fase 3 — UX y frontend (Prioridad media)
 
 ### 3.1 Formularios
-- [ ] Validacion en tiempo real en Register y EventCreate (feedback visual)
-- [ ] Dialogo de confirmacion antes de publicar/finalizar evento
-- [ ] Debounce en busqueda de eventos (evitar peticiones por cada tecla)
-- [ ] Selector de deporte con opciones predefinidas (no texto libre)
+- [x] Validacion en tiempo real en Register y EventCreate (feedback visual)
+- [x] Dialogo de confirmacion antes de publicar/finalizar evento
+- [x] Debounce en busqueda de eventos (evitar peticiones por cada tecla)
+- [x] Selector de deporte con opciones predefinidas (no texto libre)
 
 ### 3.2 UI/UX
-- [ ] Skeleton loaders en vez de spinners (EventList, EventDetail)
-- [ ] Empty states con iconos e indicaciones claras
-- [ ] Paginacion visual en listado de eventos
-- [ ] Toast de aviso cuando el token JWT expira
-- [ ] Revocar `URL.createObjectURL` en EventCreate (memory leak)
+- [x] Skeleton loaders en vez de spinners (EventList)
+- [x] Empty states con iconos e indicaciones claras
+- [x] Paginacion visual en listado de eventos
+- [x] Toast de aviso cuando el token JWT expira
+- [x] Revocar `URL.createObjectURL` en EventCreate (memory leak)
 
 ### 3.3 Accesibilidad
-- [ ] Agregar `aria-label` y `aria-expanded` en Navbar mobile
-- [ ] Keyboard navigation en menu mobile
+- [x] Agregar `aria-label` y `aria-expanded` en Navbar mobile
+- [x] Keyboard navigation en menu mobile (role="button", onKeyDown)
 - [ ] Verificar contraste WCAG AA (lime-400 sobre dark-900)
-- [ ] Agregar `type="button"` a botones que no son submit
+- [x] Agregar `type="button"` a botones que no son submit
 
 ### 3.4 Codigo
-- [ ] Extraer `SPORT_IMAGES` a archivo compartido (`src/utils/sportImages.js`)
-- [ ] Extraer formateo de fechas a util reutilizable
+- [x] Extraer `SPORT_IMAGES` a archivo compartido (`src/utils/sportImages.js`)
+- [x] Extraer formateo de fechas a util reutilizable (`src/utils/formatDate.js`)
 - [ ] Comprimir imagenes antes de subir (client-side resize)
 
 ---
@@ -85,29 +85,29 @@ El proyecto tiene la funcionalidad base completa: auth con JWT, CRUD de eventos,
 ## Fase 4 — Infraestructura (Prioridad baja)
 
 ### 4.1 Docker
-- [ ] Crear `docker-compose.prod.yml` con builds optimizados
-- [ ] Frontend: multi-stage build (build + nginx) en vez de `npm run dev`
-- [ ] Backend: eliminar `--reload` del Dockerfile de produccion
-- [ ] Agregar `HEALTHCHECK` a ambos Dockerfiles
-- [ ] Crear usuario no-root en contenedores
-- [ ] Crear `.dockerignore` para frontend y backend
-- [ ] Mover credenciales de BD a variables de entorno (no hardcodear en compose)
+- [x] Crear `docker-compose.prod.yml` con builds optimizados
+- [x] Frontend: multi-stage build (build + nginx) en vez de `npm run dev`
+- [x] Backend: eliminar `--reload` del Dockerfile de produccion
+- [x] Agregar `HEALTHCHECK` a ambos Dockerfiles
+- [x] Crear usuario no-root en contenedores
+- [x] Crear `.dockerignore` para frontend y backend
+- [x] Mover credenciales de BD a variables de entorno (no hardcodear en compose)
 
 ### 4.2 CI/CD
-- [ ] GitHub Actions: lint + tests en cada push
+- [x] GitHub Actions: lint + tests en cada push
 - [ ] GitHub Actions: build Docker images en cada merge a main
 - [ ] Pre-commit hooks (flake8, black, eslint)
 
 ### 4.3 Testing
-- [ ] Tests unitarios para schemas (validaciones)
-- [ ] Tests de integracion para endpoints (auth, events, inscriptions)
+- [x] Tests unitarios para schemas (validaciones)
+- [x] Tests de integracion para endpoints (auth, events, inscriptions)
 - [ ] Tests E2E con Playwright (registro, inscripcion, pago)
 - [ ] Coverage minimo 80%
 
 ### 4.4 Monitoring
 - [ ] Sentry para error tracking (backend + frontend)
 - [ ] Logging centralizado con formato JSON
-- [ ] Health check endpoint mejorado (verificar conexion BD)
+- [x] Health check endpoint mejorado (verificar conexion BD)
 
 ---
 

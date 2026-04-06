@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import case
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
 from app.core.security import get_current_user, require_organizer
@@ -111,5 +111,6 @@ def get_event_ranking(event_id: int, db: Session = Depends(get_db)):
     else:  # position
         query = query.order_by(case((Result.position.is_(None), 1), else_=0), Result.position.asc())
 
+    query = query.options(joinedload(Result.user))
     results = query.all()
     return [_result_to_response(r) for r in results]

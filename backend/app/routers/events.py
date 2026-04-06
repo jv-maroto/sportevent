@@ -3,7 +3,7 @@ import uuid
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
 from app.core.config import settings
@@ -41,7 +41,9 @@ def list_my_events(
     current_user: User = Depends(require_organizer),
 ):
     """Listar todos los eventos del organizador (incluidos borradores)."""
-    events = db.query(Event).filter(Event.organizer_id == current_user.id).order_by(Event.date.asc()).all()
+    events = db.query(Event).options(
+        joinedload(Event.organizer), joinedload(Event.inscriptions)
+    ).filter(Event.organizer_id == current_user.id).order_by(Event.date.asc()).all()
     return [_event_to_response(e) for e in events]
 
 
@@ -57,11 +59,12 @@ def list_events(
 
     if sport:
         query = query.filter(Event.sport.ilike(f"%{sport}%"))
-    if status_filter:
+    if status_filter and status_filter in ("published", "finished"):
         query = query.filter(Event.status == status_filter)
     if search:
         query = query.filter(Event.title.ilike(f"%{search}%"))
 
+    query = query.options(joinedload(Event.organizer), joinedload(Event.inscriptions))
     events = query.order_by(Event.date.asc()).all()
     return [_event_to_response(e) for e in events]
 
@@ -69,7 +72,9 @@ def list_events(
 @router.get("/{event_id}", response_model=EventResponse)
 def get_event(event_id: int, db: Session = Depends(get_db)):
     """Obtener detalle de un evento por ID."""
-    event = db.query(Event).filter(Event.id == event_id).first()
+    event = db.query(Event).options(
+        joinedload(Event.organizer), joinedload(Event.inscriptions)
+    ).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="Evento no encontrado")
     return _event_to_response(event)
@@ -152,11 +157,18 @@ async def upload_event_image(
         raise HTTPException(status_code=400, detail="Solo se permiten imagenes JPEG, PNG o WebP")
 
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    ext = file.filename.split(".")[-1] if file.filename else "jpg"
-    filename = f"{uuid.uuid4()}.{ext}"
-    filepath = os.path.join(settings.UPLOAD_DIR, filename)
+    allowed_exts = {"jpg", "jpeg", "png", "webp"}
+    ext = file.filename.split(".")[-1].lower() if file.filename else "jpg"
+    if ext not in allowed_exts:
+        raise HTTPException(status_code=400, detail="Extension no permitida. Usa JPG, PNG o WebP")
 
     content = await file.read()
+    max_size = 5 * 1024 * 1024  # 5MB
+    if len(content) > max_size:
+        raise HTTPException(status_code=413, detail="La imagen no puede superar 5MB")
+
+    filename = f"{uuid.uuid4()}.{ext}"
+    filepath = os.path.join(settings.UPLOAD_DIR, filename)
     with open(filepath, "wb") as f:
         f.write(content)
 

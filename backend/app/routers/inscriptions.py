@@ -1,10 +1,13 @@
+import logging
 from typing import List
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
+
+logger = logging.getLogger(__name__)
 from app.core.config import settings
 from app.core.security import get_current_user, require_organizer
 from app.models.user import User
@@ -61,6 +64,18 @@ def create_checkout(
         status="pending",
     )
     db.add(inscription)
+    db.flush()
+
+    # Verificar plazas de nuevo tras el flush (proteccion contra race condition)
+    confirmed_count = db.query(Inscription).filter(
+        Inscription.event_id == event_id,
+        Inscription.status.in_(["pending", "confirmed"]),
+        Inscription.id != inscription.id,
+    ).count()
+    if confirmed_count >= event.max_capacity:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="No quedan plazas disponibles")
+
     db.commit()
     db.refresh(inscription)
 
@@ -89,15 +104,19 @@ def create_checkout(
                 "quantity": 1,
             }],
             mode="payment",
+            customer_email=current_user.email,
             success_url=f"{settings.CORS_ORIGINS.split(',')[0]}/inscription/success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{settings.CORS_ORIGINS.split(',')[0]}/events/{event_id}",
-            metadata={"inscription_id": str(inscription.id)},
+            metadata={
+                "inscription_id": str(inscription.id),
+                "user_id": str(current_user.id),
+            },
         )
-    except Exception as e:
-        # Si Stripe falla, confirmar directamente en desarrollo
-        inscription.status = "confirmed"
+    except stripe.error.StripeError as e:
+        logger.error(f"Error de Stripe: {str(e)}")
+        db.delete(inscription)
         db.commit()
-        return CheckoutResponse(checkout_url="free", session_id="stripe_fallback")
+        raise HTTPException(status_code=500, detail="Error al procesar el pago. Intenta de nuevo.")
 
     inscription.stripe_session_id = session.id
     db.commit()
@@ -118,12 +137,17 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        inscription_id = session.get("metadata", {}).get("inscription_id")
+        metadata = session.get("metadata", {})
+        inscription_id = metadata.get("inscription_id")
+        user_id = metadata.get("user_id")
         if inscription_id:
             inscription = db.query(Inscription).filter(Inscription.id == int(inscription_id)).first()
-            if inscription:
+            if inscription and str(inscription.user_id) == user_id:
                 inscription.status = "confirmed"
+                inscription.stripe_session_id = session.get("id")
                 db.commit()
+            else:
+                logger.warning(f"Webhook: user_id mismatch para inscripcion {inscription_id}")
 
     return {"status": "ok"}
 
@@ -134,7 +158,9 @@ def my_inscriptions(
     current_user: User = Depends(get_current_user),
 ):
     """Listar mis inscripciones."""
-    inscriptions = db.query(Inscription).filter(Inscription.user_id == current_user.id).all()
+    inscriptions = db.query(Inscription).options(
+        joinedload(Inscription.user), joinedload(Inscription.event)
+    ).filter(Inscription.user_id == current_user.id).all()
     return [_inscription_to_response(i) for i in inscriptions]
 
 
@@ -149,5 +175,7 @@ def event_inscriptions(
     if not event:
         raise HTTPException(status_code=404, detail="Evento no encontrado o no tienes permiso")
 
-    inscriptions = db.query(Inscription).filter(Inscription.event_id == event_id).all()
+    inscriptions = db.query(Inscription).options(
+        joinedload(Inscription.user), joinedload(Inscription.event)
+    ).filter(Inscription.event_id == event_id).all()
     return [_inscription_to_response(i) for i in inscriptions]

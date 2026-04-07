@@ -11,7 +11,10 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
 from app.core.database import Base, get_db
 from app.main import app
 
-engine = create_engine("sqlite:///./test.db", connect_args={"check_same_thread": False})
+# Usar la DATABASE_URL del entorno (PostgreSQL en CI, SQLite local)
+TEST_DB_URL = os.environ.get("DATABASE_URL", "sqlite:///./test.db")
+connect_args = {"check_same_thread": False} if TEST_DB_URL.startswith("sqlite") else {}
+engine = create_engine(TEST_DB_URL, connect_args=connect_args)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -20,7 +23,7 @@ def setup_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
-    if os.path.exists("./test.db"):
+    if TEST_DB_URL.startswith("sqlite") and os.path.exists("./test.db"):
         os.remove("./test.db")
 
 

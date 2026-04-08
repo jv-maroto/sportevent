@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { getEvent } from '../services/events';
 import { getEventRanking } from '../services/results';
 import { createCheckout } from '../services/inscriptions';
@@ -12,6 +12,7 @@ import { formatDate, formatTime } from '../utils/formatDate';
 
 export default function EventDetail() {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [event, setEvent] = useState(null);
   const [ranking, setRanking] = useState([]);
@@ -23,6 +24,13 @@ export default function EventDetail() {
   useEffect(() => {
     loadData();
   }, [id]);
+
+  useEffect(() => {
+    if (searchParams.get('cancelled') === 'true') {
+      toast('Pago cancelado. Tu inscripcion no se ha completado.', { icon: '!' });
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const loadData = async () => {
     try {

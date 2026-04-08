@@ -57,7 +57,11 @@ def create_checkout(
         Inscription.status.in_(["pending", "confirmed"]),
     ).first()
     if existing:
-        raise HTTPException(status_code=400, detail="Ya estas inscrito en este evento")
+        if existing.status == "confirmed":
+            raise HTTPException(status_code=400, detail="Ya estas inscrito en este evento")
+        # Limpiar inscripcion pendiente anterior (pago cancelado/expirado)
+        db.delete(existing)
+        db.flush()
 
     # Crear inscripcion pendiente
     inscription = Inscription(
@@ -114,7 +118,7 @@ def create_checkout(
             mode="payment",
             customer_email=current_user.email,
             success_url=f"{settings.CORS_ORIGINS.split(',')[0]}/inscription/success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{settings.CORS_ORIGINS.split(',')[0]}/events/{event_id}",
+            cancel_url=f"{settings.CORS_ORIGINS.split(',')[0]}/events/{event_id}?cancelled=true",
             metadata={
                 "inscription_id": str(inscription.id),
                 "user_id": str(current_user.id),

@@ -22,7 +22,7 @@ frontend/build/
 .env.production
 
 # Claude Code (config local)
-.claude/settings.local.json
+.claude/
 
 # IDE
 .vscode/
